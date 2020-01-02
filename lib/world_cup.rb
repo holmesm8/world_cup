@@ -6,35 +6,21 @@ class WorldCup
     @teams = teams
   end
 
-  def active_teams
-  @teams.find_all do |team|
-    team.eliminated? == false
-    end
-  end
-
   def active_players_by_position(position)
-    # active_teams.find_all do |team|
-    #   require "pry"; binding.pry
-    #   team.players_by_position(position)
-    # end
+    active_teams = @teams.find_all {|team| team if team.eliminated == false}
 
-    # active_teams.map do |team|
-    #   team.players_by_position(position)
-    # end.flat
-    active_teams.map { |team| team.players_by_position(position)}.flatten
+    active_players = active_teams.map do |team|
+      team.players.find_all {|player| player if player.position == position}
+    end.flatten
   end
 
   def all_players_by_position
-    players_by_position = {}
-    @teams.each do |team|
-      team.players.each do |player|
-        if players_by_position.keys.include?(player.position)
-          players_by_position[player.position] << player
-        else
-          players_by_position[player.position] = [player]
-        end
-      end
+    players = @teams.map {|team| team.players}.flatten
+
+    pos_hash = Hash.new {|hash, key| hash[key] = []}
+    players.reduce(pos_hash) do |key, value|
+      key[value.position] << value
+      key
     end
-    players_by_position
   end
 end
